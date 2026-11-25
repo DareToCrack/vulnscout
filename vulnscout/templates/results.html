@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Scan results — VulnScout{% endblock %}
+{% block content %}
+<h1>Scan results</h1>
+<p class="lead">{{ scan.target }} · {{ scan.profile }} profile · {{ scan.started_at }}{% if scan.is_demo %} · <span class="tag">demo data</span>{% endif %}</p>
+
+{% if scan.status == 'running' %}
+<div class="notice notice-info">
+  <strong>Scan in progress…</strong> Nmap is probing the target. This page refreshes automatically; a Standard scan of a single host usually takes a few minutes.
+</div>
+{% elif scan.status == 'failed' %}
+<div class="notice notice-danger"><strong>Scan failed.</strong> {{ scan.error }}</div>
+{% endif %}
+
+{% if scan.status == 'complete' %}
+<div class="summary-grid">
+  <div class="card score-card">
+    <div class="label">Posture score</div>
+    <div class="score {{ 'good' if scan.score >= 80 else 'ok' if scan.score >= 60 else 'bad' }}">{{ scan.score }}<span class="score-of">/100</span></div>
+    <p class="muted">Starts at 100. Critical −25, High −15, Medium −8, Low −3, Info −0. <a href="{{ url_for('report', scan_id=scan.id) }}">See the breakdown</a>.</p>
+  </div>
+  <div class="card">
+    <div class="label">Findings by severity</div>
+    <div class="counts">
+      {% for sev in ['Critical','High','Medium','Low','Info'] %}
+      <a class="count count-{{ sev|lower }}" href="{{ url_for('scan_results', scan_id=scan.id, severity=sev) }}">
+        <span class="count-num">{{ counts[sev] }}</span> {{ sev }}
+      </a>
+      {% endfor %}
+    </div>
+    <p class="muted">{{ scan.hosts|length }} host{{ 's' if scan.hosts|length != 1 }} scanned · {{ scan.findings|length }} findings</p>
+  </div>
+</div>
+
+<section class="card">
+  <h2>Fix first — prioritised remediation</h2>
+  <ol class="fix-list">
+  {% for f in fix_first %}
+    <li>
+      <span class="badge badge-{{ f.severity|lower }}">{{ f.severity }}</span>
+      <strong>{{ f.title }}</strong>
+      <span class="muted">— {{ f.remediation[0] }}</span>
+    </li>
+  {% endfor %}
+  </ol>
+</section>
+
+<section class="card">
+  <h2>Hosts</h2>
+  <table>
+    <thead><tr><th>Host</th><th>Operating system</th><th>Open ports</th><th>Findings</th><th>Score</th><th></th></tr></thead>
+    <tbody>
+    {% for h in scan.hosts %}
+      <tr>
+        <td><strong>{{ h.address }}</strong>{% if h.hostnames %} <span class="muted">{{ h.hostnames|join(', ') }}</span>{% endif %}</td>
+        <td>{{ h.os.name if h.os else 'Unknown' }}</td>
+        <td>{{ h.ports|selectattr('state', 'equalto', 'open')|list|length }}</td>
+        <td>{{ h.findings|length }}</td>
+        <td><strong>{{ h.score }}</strong>/100</td>
+        <td><a href="{{ url_for('host_detail', scan_id=scan.id, address=h.address) }}">Details</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>All findings</h2>
+  <form method="get" class="filter-row">
+    <select name="severity">
+      <option value="">All severities</option>
+      {% for sev in ['Critical','High','Medium','Low','Info'] %}
+      <option value="{{ sev }}" {% if severity == sev %}selected{% endif %}>{{ sev }}</option>
+      {% endfor %}
+    </select>
+    <input type="search" name="q" placeholder="Search findings…" value="{{ query }}">
+    <button class="btn" type="submit">Filter</button>
+    {% if severity or query %}<a class="btn btn-ghost" href="{{ url_for('scan_results', scan_id=scan.id) }}">Clear</a>{% endif %}
+  </form>
+  {% if findings %}
+  <table>
+    <thead><tr><th>Severity</th><th>Finding</th><th>Host</th><th>Port</th></tr></thead>
+    <tbody>
+    {% for f in findings %}
+      <tr>
+        <td><span class="badge badge-{{ f.severity|lower }}">{{ f.severity }}</span></td>
+        <td><strong>{{ f.title }}</strong><br><span class="muted">{{ f.explanation }}</span></td>
+        <td>{{ f.host }}</td>
+        <td>{{ f.port or '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No findings match this filter.</p>
+  {% endif %}
+</section>
+
+<div class="actions">
+  <a class="btn btn-primary" href="{{ url_for('report', scan_id=scan.id) }}">Full HTML report</a>
+  <a class="btn" href="{{ url_for('export_csv', scan_id=scan.id) }}">Download CSV</a>
+  <a class="btn" href="{{ url_for('export_json', scan_id=scan.id) }}">Download JSON</a>
+</div>
+{% endif %}
+{% endblock %}

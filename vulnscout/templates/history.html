@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Scan history — VulnScout{% endblock %}
+{% block content %}
+<h1>Scan history</h1>
+<p class="lead">Every scan is kept here, with its target, profile, score and date.</p>
+{% if scans %}
+<section class="card">
+  <table>
+    <thead><tr><th>Target</th><th>Profile</th><th>Status</th><th>Score</th><th>Started</th><th>Finished</th><th></th></tr></thead>
+    <tbody>
+    {% for s in scans %}
+      <tr>
+        <td>{{ s.target }}{% if s.is_demo %} <span class="tag">demo</span>{% endif %}</td>
+        <td>{{ s.profile }}</td>
+        <td><span class="status status-{{ s.status }}">{{ s.status }}</span></td>
+        <td>{{ s.score if s.score is not none else '—' }}</td>
+        <td class="muted">{{ s.started_at }}</td>
+        <td class="muted">{{ s.finished_at or '—' }}</td>
+        <td>
+          <a href="{{ url_for('scan_results', scan_id=s.id) }}">View</a>
+          <form method="post" action="{{ url_for('delete', scan_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this scan record?')">
+            <button class="link-btn" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% else %}
+<section class="card"><p>No scans yet. <a href="{{ url_for('new_scan') }}">Start your first scan</a> or load the demo.</p></section>
+{% endif %}
+{% endblock %}

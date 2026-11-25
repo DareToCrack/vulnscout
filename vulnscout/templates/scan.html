@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}New scan — VulnScout{% endblock %}
+{% block content %}
+<h1>Start a new scan</h1>
+<p class="lead">VulnScout probes the target with Nmap, checks the results against known vulnerability patterns, and produces an actionable report.</p>
+
+{% if error %}
+<div class="notice notice-danger">{{ error }}</div>
+{% endif %}
+{% if not nmap_available %}
+<div class="notice notice-warning"><strong>Nmap is not installed.</strong> Live scans are disabled on this machine — use the demo scan below instead.</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('new_scan') }}" class="card form-card">
+  <label for="target">Target</label>
+  <input id="target" name="target" type="text" placeholder="192.168.1.1 or example.com or 192.168.1.0/24"
+         value="{{ target or '' }}" required>
+  <p class="hint">A single host, IP address or domain — or a network range up to a /24 (256 addresses). Larger ranges are refused.</p>
+
+  <label>Scan profile</label>
+  {% for name, p in profiles.items() %}
+  <label class="radio">
+    <input type="radio" name="profile" value="{{ name }}" {% if name == 'standard' %}checked{% endif %}>
+    <strong>{{ p.label }}</strong> — {{ p.description }}
+  </label>
+  {% endfor %}
+
+  <label class="check">
+    <input type="checkbox" name="authorised" required>
+    <span><strong>I own this network, or I have written permission to scan it.</strong><br>
+    Scanning a network without permission is illegal. VulnScout will not start a scan without this confirmation.</span>
+  </label>
+
+  <button class="btn btn-primary" type="submit" {% if not nmap_available %}disabled{% endif %}>Start scan</button>
+</form>
+
+<section class="card">
+  <h2>Or explore with demo data</h2>
+  <p>The demo scan is a fictional small-business network (a dental clinic) with realistic findings, including one Critical. No Nmap or network access needed.</p>
+  <form method="post" action="{{ url_for('demo_scan') }}">
+    <button class="btn" type="submit">Load demo scan</button>
+  </form>
+</section>
+{% endblock %}

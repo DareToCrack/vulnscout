@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}VulnScout{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% if scan and scan.status == 'running' %}
+<meta http-equiv="refresh" content="5">
+{% endif %}
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">&#9670;</span> VulnScout
+      <span class="brand-sub">Automated Vulnerability Scanner</span>
+    </a>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('new_scan') }}">New scan</a>
+      <a href="{{ url_for('history') }}">Scan history</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  {% block content %}{% endblock %}
+</main>
+<footer class="wrap footer">
+  VulnScout — scan only networks you own or have written permission to scan.
+  Scanning without permission is illegal.
+</footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — VulnScout{% endblock %}
+{% block content %}
+<h1>Security posture at a glance</h1>
+<p class="lead">Scan your own network, see what is exposed, and get a prioritised list of exactly what to fix first.</p>
+
+<div class="actions">
+  <a class="btn btn-primary" href="{{ url_for('new_scan') }}">Start a new scan</a>
+  <form method="post" action="{{ url_for('demo_scan') }}" class="inline-form">
+    <button class="btn" type="submit">Load demo scan</button>
+  </form>
+</div>
+
+{% if not nmap_available %}
+<div class="notice notice-warning">
+  <strong>Nmap is not installed on this machine.</strong> Live scans are disabled.
+  Install Nmap (see the README) or use the demo scan to explore the interface.
+</div>
+{% endif %}
+
+{% if latest %}
+<section class="card">
+  <h2>Latest completed scan</h2>
+  <div class="scan-summary">
+    <div>
+      <div class="label">Target</div>
+      <div class="big">{{ latest.target }}</div>
+      <div class="muted">{{ latest.profile }} profile · {{ latest.finished_at or latest.started_at }}</div>
+    </div>
+    <div class="score-box">
+      <div class="label">Posture score</div>
+      <div class="score {{ 'good' if latest.score >= 80 else 'ok' if latest.score >= 60 else 'bad' }}">{{ latest.score }}<span class="score-of">/100</span></div>
+    </div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('scan_results', scan_id=latest.id) }}">View results</a>
+  <a class="btn" href="{{ url_for('report', scan_id=latest.id) }}">Full report</a>
+</section>
+{% elif scans %}
+<p class="muted">No completed scans yet — the latest scan is still running or failed. Check the history.</p>
+{% else %}
+<section class="card">
+  <h2>No scans yet</h2>
+  <p>Run your first scan, or load the demo scan to see what a report looks like — the demo is a fictional small-business network with realistic findings, including one Critical.</p>
+</section>
+{% endif %}
+
+{% if scans %}
+<section class="card">
+  <h2>Recent scans</h2>
+  <table>
+    <thead><tr><th>Target</th><th>Profile</th><th>Status</th><th>Score</th><th>Started</th><th></th></tr></thead>
+    <tbody>
+    {% for s in scans %}
+      <tr>
+        <td>{{ s.target }}{% if s.is_demo %} <span class="tag">demo</span>{% endif %}</td>
+        <td>{{ s.profile }}</td>
+        <td><span class="status status-{{ s.status }}">{{ s.status }}</span></td>
+        <td>{{ s.score if s.score is not none else '—' }}</td>
+        <td class="muted">{{ s.started_at }}</td>
+        <td><a href="{{ url_for('scan_results', scan_id=s.id) }}">View</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

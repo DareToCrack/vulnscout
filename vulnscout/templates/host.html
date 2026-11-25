@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ host.address }} — VulnScout{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('scan_results', scan_id=scan.id) }}">&larr; Back to scan results</a></p>
+<h1>{{ host.address }}{% if host.hostnames %} <span class="muted">{{ host.hostnames|join(', ') }}</span>{% endif %}</h1>
+<p class="lead">{{ host.os.name if host.os else 'Operating system unknown' }}{% if host.os and host.os.accuracy %} ({{ host.os.accuracy }}% confidence){% endif %} · Posture score <strong>{{ host.score }}/100</strong></p>
+
+<section class="card">
+  <h2>Score breakdown</h2>
+  <table>
+    <thead><tr><th>Finding</th><th>Severity</th><th>Deduction</th></tr></thead>
+    <tbody>
+      <tr><td>Starting score</td><td>—</td><td>100</td></tr>
+      {% for b in host.breakdown %}
+      <tr><td>{{ b.title }}</td><td><span class="badge badge-{{ b.severity|lower }}">{{ b.severity }}</span></td><td>−{{ b.deduction }}</td></tr>
+      {% endfor %}
+      <tr><td><strong>Final score</strong></td><td></td><td><strong>{{ host.score }}</strong></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Open ports</h2>
+  <table>
+    <thead><tr><th>Port</th><th>Service</th><th>Product</th><th>Version</th></tr></thead>
+    <tbody>
+    {% for p in host.ports %}
+      {% if p.state == 'open' %}
+      <tr><td>{{ p.port }}/{{ p.protocol }}</td><td>{{ p.service.name }}</td><td>{{ p.service.product or '—' }}</td><td>{{ p.service.version or '—' }}</td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Findings on this host</h2>
+  {% for f in host.findings %}
+  <div class="finding">
+    <span class="badge badge-{{ f.severity|lower }}">{{ f.severity }}</span>
+    <strong>{{ f.title }}</strong>
+    {% if f.cve %}<span class="tag">{{ f.cve }}</span>{% endif %}
+    <p>{{ f.explanation }}</p>
+    <p><strong>What to fix:</strong></p>
+    <ul>
+      {% for step in f.remediation %}<li>{{ step }}</li>{% endfor %}
+    </ul>
+    {% if f.references %}
+    <p class="muted">References:
+      {% for r in f.references %}<a href="{{ r }}" target="_blank" rel="noopener">{{ r }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="muted">No findings on this host.</p>
+  {% endfor %}
+</section>
+{% endblock %}

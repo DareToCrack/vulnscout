@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -T4 -sV -O --script vulners,ssl-heartbleed,ssl-poodle 10.0.0.5" start="1730000000" version="7.94" xmloutputversion="1.05">
+<host starttime="1730000000" endtime="1730000010">
+  <status state="up" reason="syn-ack" reason_ttl="0"/>
+  <address addr="10.0.0.5" addrtype="ipv4"/>
+  <hostnames><hostname name="oldserver.local" type="PTR"/></hostnames>
+  <ports>
+    <port protocol="tcp" portid="443">
+      <state state="open" reason="syn-ack" reason_ttl="64"/>
+      <service name="https" product="OpenSSL" version="1.0.1f" method="probed" conf="10"/>
+      <script id="ssl-heartbleed" output="&#xa;  VULNERABLE:&#xa;  The Heartbleed Bug is a serious vulnerability in the popular OpenSSL cryptographic software library.&#xa;    State: VULNERABLE&#xa;    Risk factor: High"/>
+      <script id="ssl-poodle" output="&#xa;  VULNERABLE:&#xa;  SSLv3 is enabled&#xa;    State: VULNERABLE"/>
+      <script id="vulners" output="  cpe:/a:openssl:openssl:1.0.1f&#xa;    CVE-2014-0160&#x9;7.5&#x9;https://vulners.com/cve/CVE-2014-0160&#xa;    CVE-2016-2107&#x9;5.9&#x9;https://vulners.com/cve/CVE-2016-2107&#xa;    CVE-2016-6304"/>
+    </port>
+    <port protocol="tcp" portid="8080">
+      <state state="open" reason="syn-ack" reason_ttl="64"/>
+      <service name="http-proxy" product="" version="" method="table" conf="3"/>
+    </port>
+    <port protocol="tcp" portid="22">
+      <state state="filtered" reason="no-response" reason_ttl="0"/>
+      <service name="ssh" method="table" conf="3"/>
+    </port>
+  </ports>
+  <hostscript>
+    <script id="smb-vuln-ms17-010" output="&#xa;  VULNERABLE:&#xa;  Remote Code Execution vulnerability in Microsoft SMBv1 servers&#xa;    State: VULNERABLE"/>
+  </hostscript>
+  <os>
+    <osmatch name="Linux 3.2 - 4.9" accuracy="91" line="5678"/>
+  </os>
+</host>
+<runstats><finished time="1730000010" elapsed="10" summary="Nmap done" exit="success"/><hosts up="1" down="0" total="1"/></runstats>
+</nmaprun>

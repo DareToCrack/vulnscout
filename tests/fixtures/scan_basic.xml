@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -T4 --top-ports 100 -sV -oX - 192.168.1.10" start="1730000000" version="7.94" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="100" services="1-100"/>
+<host starttime="1730000000" endtime="1730000005">
+  <status state="up" reason="arp-response" reason_ttl="0"/>
+  <address addr="192.168.1.10" addrtype="ipv4"/>
+  <hostnames><hostname name="office-pc.local" type="PTR"/></hostnames>
+  <ports>
+    <port protocol="tcp" portid="22">
+      <state state="open" reason="syn-ack" reason_ttl="64"/>
+      <service name="ssh" product="OpenSSH" version="8.9p1" extrainfo="Ubuntu" method="probed" conf="10"/>
+    </port>
+    <port protocol="tcp" portid="23">
+      <state state="open" reason="syn-ack" reason_ttl="64"/>
+      <service name="telnet" product="Linux telnetd" method="probed" conf="10"/>
+    </port>
+    <port protocol="tcp" portid="80">
+      <state state="open" reason="syn-ack" reason_ttl="64"/>
+      <service name="http" product="Apache httpd" version="2.4.29" method="probed" conf="10"/>
+      <script id="vulners" output="  cpe:/a:apache:http_server:2.4.29&#xa;    CVE-2021-44790&#x9;9.8&#x9;https://vulners.com/cve/CVE-2021-44790"/>
+    </port>
+    <port protocol="tcp" portid="443">
+      <state state="closed" reason="reset" reason_ttl="64"/>
+      <service name="https" method="table" conf="3"/>
+    </port>
+  </ports>
+  <os>
+    <osmatch name="Linux 5.15" accuracy="96" line="1234"/>
+  </os>
+</host>
+<host starttime="1730000000" endtime="1730000005">
+  <status state="down" reason="no-response" reason_ttl="0"/>
+  <address addr="192.168.1.11" addrtype="ipv4"/>
+</host>
+<runstats><finished time="1730000005" timestr="Tue Oct 29 2024" elapsed="5" summary="Nmap done at Tue Oct 29 2024; 2 IP addresses (1 host up) scanned in 5.00 seconds" exit="success"/><hosts up="1" down="1" total="2"/></runstats>
+</nmaprun>
